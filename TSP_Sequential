@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+
+int main(void)
+{
+    FILE *fp = fopen("points.txt", "rt");
+    double temp_x, temp_y, distance, Total_distance;
+    int array_x[200];
+    int route[101];
+    int visited[100] = {0};
+    int i;
+    int location_num = 0;
+    char line[80];
+
+    clock_t start = clock();
+
+    while(fgets(line, 80, fp) != NULL)
+    {
+        sscanf (line, "%d %d", &array_x[location_num], &array_x[location_num+1]);
+        location_num+=2;
+    }
+    clock_t start_2 = clock();
+
+/*
+    printf("location coordinates\n");
+    for (i = 0; i < location_num; i+=2)
+    {
+        printf("(%d): %d / %d\n", i, array_x[i],array_x[i+1]);
+    }
+    //printf("\n--==Creating Route==--\n");
+    */
+
+    fclose(fp);
+
+    int current_loc = 0;
+    int testing = 1;
+    int spot;
+    int j = 1;
+
+    for(i = 0; i < 102; i++)
+    {
+        route[i] = -1;
+    }
+
+    route[0] = 0;
+    while(testing == 1)
+    {
+       double temp_distance = 9999999;
+       for (i = 2; i < location_num; i+=2)
+       {
+          if(visited[i] == 0)
+          {
+             temp_x = (double)array_x[i] - (double)array_x[current_loc];
+             temp_y = (double)array_x[i+1] - (double)array_x[current_loc+1];
+
+             distance = sqrt((temp_x*temp_x)+(temp_y*temp_y));
+
+             if(distance < temp_distance)
+             {
+                 temp_distance = distance;
+                 spot = i;
+             }
+          }
+       }
+
+       if(temp_distance < 9999999)
+       {
+           //printf("connecting from (%d) to (%d)\n", current_loc, spot);
+           route[j] = spot;
+           j++;
+
+           Total_distance += temp_distance;
+           visited [spot] = 1;
+           current_loc = spot;
+       }else
+       {
+          temp_x = (double)array_x[0] - (double)array_x[current_loc];
+          temp_y = (double)array_x[1] - (double)array_x[current_loc+1];
+
+          distance = sqrt((temp_x*temp_x)+(temp_y*temp_y));
+          Total_distance += distance;
+
+          testing = 0;
+          //printf("connecting from (%d) to (0)\n", current_loc);
+          route[j] = 0;
+          j++;
+       }
+    }
+    clock_t stop = clock();
+
+    printf("\n-----==========-----\n");
+    for(i = 0; i<100; i++)
+    {
+       if(route[i]==-1)
+       {
+          i = 101;
+       }else
+       {
+          printf("(%d)",route[i]);
+       }
+    }
+    printf("\n");
+
+    printf("Total distance of route: %f\n", Total_distance);
+
+    double elapsed = (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
+    printf("Entire Program Time in ms: %f\n", elapsed);
+
+    elapsed = (double)(stop - start_2) * 1000.0 / CLOCKS_PER_SEC;
+    printf("Entire Program Time without Array Setup in ms: %f\n", elapsed);
+
+    return 0;
+}
